@@ -70,7 +70,7 @@ DINNER_OPTIONS = {
     "AVM: Fast Food Menü (Klasik Burger + Patates Kızartması + Kola)": {"cal": 1150, "protein": 28, "carb": 135, "fat": 52}
 }
 
-# Session State Başlatma
+# Session State Değişkenleri
 if "view" not in st.session_state:
     st.session_state.view = "setup"
 if "current_index" not in st.session_state:
@@ -89,7 +89,7 @@ if "rest_mode" not in st.session_state:
     st.session_state.rest_mode = None
 
 # ==========================================
-# SOL MENÜ: MODÜL SEÇİMİ
+# SOL MENÜ
 # ==========================================
 st.sidebar.title("⚡ Menü")
 app_mode = st.sidebar.radio("Mod Seçiniz:", ["⏱️ Antrenman & Sayaç", "🥗 Günlük Beslenme & Kalori"])
@@ -157,8 +157,17 @@ if app_mode == "🥗 Günlük Beslenme & Kalori":
     st.subheader("📊 Günlük Toplam Değerlerin")
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Toplam Kalori", f"{total_cal} kcal", delta=f"{DAILY_CALORIE_TARGET - total_cal} bütçe kaldı" if total_cal <= DAILY_CALORIE_TARGET else f"{total_cal - DAILY_CALORIE_TARGET} aşıldı", delta_color="inverse" if total_cal > DAILY_CALORIE_TARGET else "normal")
-    c2.metric("Protein", f"{total_protein} g", delta=f"{total_protein - DAILY_PROTEIN_TARGET} g" if total_protein >= DAILY_PROTEIN_TARGET else f"{DAILY_PROTEIN_TARGET - total_protein} g eksik")
+    c1.metric(
+        "Toplam Kalori", 
+        f"{total_cal} kcal", 
+        delta=f"{DAILY_CALORIE_TARGET - total_cal} bütçe kaldı" if total_cal <= DAILY_CALORIE_TARGET else f"{total_cal - DAILY_CALORIE_TARGET} aşıldı", 
+        delta_color="inverse" if total_cal > DAILY_CALORIE_TARGET else "normal"
+    )
+    c2.metric(
+        "Protein", 
+        f"{total_protein} g", 
+        delta=f"{total_protein - DAILY_PROTEIN_TARGET} g" if total_protein >= DAILY_PROTEIN_TARGET else f"{DAILY_PROTEIN_TARGET - total_protein} g eksik"
+    )
     c3.metric("Karbonhidrat", f"{total_carb} g")
     c4.metric("Sağlıklı Yağ", f"{total_fat} g")
 
@@ -219,9 +228,9 @@ elif app_mode == "⏱️ Antrenman & Sayaç":
                     st.error("Lütfen en az bir bölgeden hareket seçin!")
                 else:
                     st.session_state.workout_queue = queue
-                    st.session_state.target_sets = t_sets
-                    st.session_state.rest_set_seconds = r_set
-                    st.session_state.rest_exercise_seconds = r_ex
+                    st.session_state.target_sets = int(t_sets)
+                    st.session_state.rest_set_seconds = int(r_set)
+                    st.session_state.rest_exercise_seconds = int(r_ex)
                     st.session_state.current_index = 0
                     st.session_state.current_set = 1
                     st.session_state.rest_mode = None
@@ -295,24 +304,24 @@ elif app_mode == "⏱️ Antrenman & Sayaç":
                     if st.button("Yeniden Planla"):
                         st.session_state.view = "setup"
                         st.rerun()
-        st.rerun()
+            st.rerun()
 
-    st.divider()
-    b_prev, b_home, b_next = st.columns(3)
-    with b_prev:
-        if st.button("⬅️ Önceki Hareket", disabled=(st.session_state.current_index == 0)):
-            st.session_state.current_index -= 1
-            st.session_state.current_set = 1
-            st.session_state.rest_mode = None
-            st.rerun()
-    with b_home:
-        if st.button("⚙️ Ayarlara Dön"):
-            st.session_state.view = "setup"
-            st.session_state.rest_mode = None
-            st.rerun()
-    with b_next:
-        if st.button("➡️ Sonraki Hareket", disabled=(st.session_state.current_index == len(queue) - 1)):
-            st.session_state.current_index += 1
-            st.session_state.current_set = 1
-            st.session_state.rest_mode = None
-            st.rerun()
+        st.divider()
+        b_prev, b_home, b_next = st.columns(3)
+        with b_prev:
+            if st.button("⬅️ Önceki Hareket", disabled=(st.session_state.current_index == 0)):
+                st.session_state.current_index -= 1
+                st.session_state.current_set = 1
+                st.session_state.rest_mode = None
+                st.rerun()
+        with b_home:
+            if st.button("⚙️ Ayarlara Dön"):
+                st.session_state.view = "setup"
+                st.session_state.rest_mode = None
+                st.rerun()
+        with b_next:
+            if st.button("➡️ Sonraki Hareket", disabled=(st.session_state.current_index == len(queue) - 1)):
+                st.session_state.current_index += 1
+                st.session_state.current_set = 1
+                st.session_state.rest_mode = None
+                st.rerun()
