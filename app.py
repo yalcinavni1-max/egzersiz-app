@@ -4,7 +4,7 @@ import time
 
 st.set_page_config(page_title="3D Fitness Coach", layout="wide", page_icon="🏋️‍♂️")
 
-# İnternetten doğrudan çekilen açık kaynaklı 3D GLB modelleri
+# Egzersiz Veritabanı (İnternet üzerinden çekilen insan 3D modelleri)
 EXERCISE_DATABASE = {
     "Goblet Squat": {
         "target": "Bacak & Kalça",
@@ -14,7 +14,7 @@ EXERCISE_DATABASE = {
     },
     "Dumbbell Chest Press": {
         "target": "Göğüs & Ön Omuz",
-        "model_url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Fox/glTF-Binary/Fox.glb",
+        "model_url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF-Binary/CesiumMan.glb",
         "reps": "12 Tekrar",
         "tips": "Sırt sehpaya tam otursun, ağırlıkları göğüsten yukarı kontrollü şekilde it."
     },
@@ -26,7 +26,7 @@ EXERCISE_DATABASE = {
     },
     "Seated Cable Row": {
         "target": "Sırt & Postür",
-        "model_url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/BrainStem/glTF-Binary/BrainStem.glb",
+        "model_url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/CesiumMan/glTF-Binary/CesiumMan.glb",
         "reps": "12 Tekrar",
         "tips": "Gövdeyi dik tut, tutacağı alt karın bölgesine çekip 1 saniye sıkıştır."
     },
@@ -44,7 +44,7 @@ EXERCISE_DATABASE = {
     }
 }
 
-# Session State Değişkenleri
+# Session State Yönetimi
 if "view" not in st.session_state:
     st.session_state.view = "setup"
 if "current_index" not in st.session_state:
@@ -62,7 +62,7 @@ if "is_resting" not in st.session_state:
 
 
 def render_online_3d_model(url):
-    """İnternetteki 3D Modeli Render Eden HTML Bileşeni"""
+    """Google Model-Viewer ile 3D GLB Modelini WebGL Üzerinde Oynatır"""
     html_code = f"""
     <!DOCTYPE html>
     <html>
@@ -130,7 +130,7 @@ if st.session_state.view == "setup":
             step=5
         )
 
-        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🚀 Antrenmanı Başlat", type="primary", use_container_width=True):
             if not st.session_state.selected_list:
                 st.error("Lütfen en az bir egzersiz seçin!")
@@ -182,7 +182,7 @@ elif st.session_state.view == "workout":
 
             st.session_state.is_resting = False
 
-            # Set ve Egzersiz Geçiş Mantığı
+            # Set ve Egzersiz İlerleme Mantığı
             if st.session_state.current_set < st.session_state.target_sets:
                 st.session_state.current_set += 1
             else:
@@ -191,13 +191,13 @@ elif st.session_state.view == "workout":
                     st.session_state.current_index += 1
                 else:
                     st.balloons()
-                    st.success("🎉 Tebrikler! Bugünkü tüm egzersizleri ve setleri tamamladın!")
+                    st.success("🎉 Harika! Bugünkü tüm egzersizleri ve setleri tamamladın!")
                     if st.button("Başa Dön"):
                         st.session_state.view = "setup"
                         st.rerun()
             st.rerun()
 
-    # Alt Navigasyon Butonları
+    # Alt Kontrol Butonları
     st.divider()
     b_prev, b_home, b_next = st.columns(3)
     with b_prev:
