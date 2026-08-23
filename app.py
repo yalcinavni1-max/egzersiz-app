@@ -40,11 +40,11 @@ EXERCISE_CATALOG = {
     "🧘 Karın & Core": {
         "Plank": {"reps": "30-45 Saniye", "tips": "Vücut başından topuğa tek düz bir çizgi halinde olmalı, karnı sıkı tut."},
         "Deadbug": {"reps": "12 Tekrar", "tips": "Sırt üstü uzan, beli yere tam yapıştır, zıt kol ve bacağı kontrollü uzat."},
-        "Hanging Knee Raise (veya Kaptan Köşkü)": {"reps": "10-12 Tekrar", "tips": "Dizlerini göğsüne doğru kontrollü çek, sallanmamaya çalış."}
+        "Hanging Knee Raise": {"reps": "10-12 Tekrar", "tips": "Dizlerini göğsüne doğru kontrollü çek, sallanmamaya çalış."}
     }
 }
 
-# Session State
+# Session State Başlatma
 if "view" not in st.session_state:
     st.session_state.view = "setup"
 if "current_index" not in st.session_state:
@@ -67,57 +67,78 @@ if "rest_mode" not in st.session_state:
 # ==========================================
 if st.session_state.view == "setup":
     st.title("🏋️ Kişisel Antrenmanını Oluştur")
-    st.caption("Her kas grubu için o gün yapmak istediğin alternatif hareketi seç.")
+    st.caption("Her kas grubu için yapmak istediğin egzersizi seç.")
 
     st.markdown("### 1. Egzersiz Alternatifleri")
-    selected_exercises = []
+    
+    # Form kullanarak seçimlerin kaybolmasını önleme
+    with st.form("workout_setup_form"):
+        temp_selections = {}
+        for group_name, exercises in EXERCISE_CATALOG.items():
+            st.markdown(f"**{group_name}**")
+            options = ["(Bu Bölgeyi Pas Geç)"] + list(exercises.keys())
+            # Varsayılan olarak her grubun 1. egzersizini seç
+            temp_selections[group_name] = st.selectbox(
+                f"{group_name} seçimi", 
+                options, 
+                index=1, 
+                label_visibility="collapsed"
+            )
 
-    for group_name, exercises in EXERCISE_CATALOG.items():
-        st.markdown(f"**{group_name}**")
-        options = ["(Bu Bölgeyi Pas Geç)"] + list(exercises.keys())
-        choice = st.selectbox(f"Seçim yap:", options, index=1, key=f"sel_{group_name}", label_visibility="collapsed")
-        
-        if choice != "(Bu Bölgeyi Pas Geç)":
-            selected_exercises.append({
-                "group": group_name,
-                "name": choice,
-                "reps": exercises[choice]["reps"],
-                "tips": exercises[choice]["tips"]
-            })
-        st.write("")
+        st.divider()
+        st.markdown("### 2. Set ve Dinlenme Ayarları")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            t_sets = st.number_input("Set Sayısı:", min_value=1, max_value=8, value=3)
+        with col2:
+            r_set = st.slider("Set Arası Dinlenme (sn):", min_value=15, max_value=120, value=60, step=5)
+        with col3:
+            r_ex = st.slider("Hareket Arası Dinlenme (sn):", min_value=30, max_value=240, value=120, step=10)
 
-    st.session_state.workout_queue = selected_exercises
+        st.markdown("<br>", unsafe_allow_html=True)
+        submit_btn = st.form_submit_button("🚀 Seçtiğim Antrenmanı Başlat", type="primary", use_container_width=True)
 
-    st.divider()
+        if submit_btn:
+            queue = []
+            for g_name, choice in temp_selections.items():
+                if choice != "(Bu Bölgeyi Pas Geç)":
+                    queue.append({
+                        "group": g_name,
+                        "name": choice,
+                        "reps": EXERCISE_CATALOG[g_name][choice]["reps"],
+                        "tips": EXERCISE_CATALOG[g_name][choice]["tips"]
+                    })
 
-    st.markdown("### 2. Set ve Dinlenme Ayarları")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.session_state.target_sets = st.number_input("Set Sayısı:", min_value=1, max_value=8, value=3)
-    with col2:
-        st.session_state.rest_set_seconds = st.slider("Set Arası Dinlenme (sn):", min_value=15, max_value=120, value=60, step=5)
-    with col3:
-        st.session_state.rest_exercise_seconds = st.slider("Hareket Arası Dinlenme (sn):", min_value=30, max_value=240, value=120, step=10)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("🚀 Seçtiğim Antrenmanı Başlat", type="primary", use_container_width=True):
-        if not st.session_state.workout_queue:
-            st.error("Lütfen en az bir bölgeden hareket seçin!")
-        else:
-            st.session_state.view = "workout"
-            st.session_state.current_index = 0
-            st.session_state.current_set = 1
-            st.session_state.rest_mode = None
-            st.rerun()
+            if not queue:
+                st.error("Lütfen en az bir bölgeden hareket seçin!")
+            else:
+                st.session_state.workout_queue = queue
+                st.session_state.target_sets = t_sets
+                st.session_state.rest_set_seconds = r_set
+                st.session_state.rest_exercise_seconds = r_ex
+                st.session_state.current_index = 0
+                st.session_state.current_set = 1
+                st.session_state.rest_mode = None
+                st.session_state.view = "workout"
+                st.rerun()
 
 # ==========================================
 # 2. EKRAN: AKTİF ANTRENMAN & SAYAÇ
 # ==========================================
 elif st.session_state.view == "workout":
     queue = st.session_state.workout_queue
+
+    # Dizin Güvenlik Kontrolü (IndexError Koruması)
+    if not queue:
+        st.session_state.view = "setup"
+        st.rerun()
+
+    if st.session_state.current_index >= len(queue):
+        st.session_state.current_index = len(queue) - 1
+
     curr = queue[st.session_state.current_index]
 
-    overall_progress = st.session_state.current_index / len(queue)
+    overall_progress = (st.session_state.current_index) / len(queue)
     st.progress(overall_progress)
     st.caption(f"Antrenman İlerlemesi: Egzersiz {st.session_state.current_index + 1} / {len(queue)}")
 
