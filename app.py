@@ -33,11 +33,17 @@ EXERCISE_CATALOG = {
         "Dumbbell Lateral Raise": {"reps": "12-15 Tekrar", "tips": "Hafif kilo kullan, kolları yana açarken dirsekleri hafif kırık tut."},
         "Face Pull (Kablo / Halat)": {"reps": "12-15 Tekrar", "tips": "Arka omuz ve postür için halatı alnına doğru çek ve dirsekleri yukarıda tut."}
     },
-    "💪 Kollar (Ön & Arka Kol)": {
-        "Dumbbell Biceps Curl": {"reps": "12 Tekrar", "tips": "Dirsekleri gövdeye sabitle, savurma yapmadan sadece ön kolu kaldır."},
-        "Rope Triceps Pushdown": {"reps": "12 Tekrar", "tips": "Dirsekleri sabit tut, halatı aşağı iterken en altta hafifçe iki yana aç."},
-        "Cable Biceps Curl": {"reps": "12 Tekrar", "tips": "Sürekli gerilim sağlamak için dirsekleri kıpırdatmadan barı yukarı bük."},
-        "Dumbbell Overhead Triceps Extension": {"reps": "12 Tekrar", "tips": "Tek bir dumbbell'ı başının arkasından yukarı doğru uzat."}
+    "💪 Biceps (Ön Kol)": {
+        "Dumbbell Biceps Curl": {"reps": "10-12 Tekrar", "tips": "Dirsekleri gövdeye sabitle, beli sallamadan sadece ön kolu kaldır."},
+        "Hammer Curl (Dumbbell)": {"reps": "10-12 Tekrar", "tips": "Avuç içleri birbirine baksın; hem ön kolu hem de kolun kalınlığını hedefler."},
+        "Cable Biceps Curl": {"reps": "12 Tekrar", "tips": "Kablo gerilimiyle dirsekleri sabit tutarak barı göğse doğru çek."},
+        "Concentration Curl": {"reps": "10 Tekrar (Her Kol)", "tips": "Dirseğini uyluğuna daya, tüm yükü biceps kasına odakla."}
+    },
+    "🦾 Triceps (Arka Kol)": {
+        "Rope Triceps Pushdown": {"reps": "12 Tekrar", "tips": "Dirsekleri gövdeye yapıştır, halatı aşağı iterken en altta iki yana aç."},
+        "Straight Bar Pushdown": {"reps": "10-12 Tekrar", "tips": "Düz barı göğüs hizasından aşağı düz bir çizgi halinde it."},
+        "Dumbbell Overhead Triceps Extension": {"reps": "10-12 Tekrar", "tips": "Tek dumbbell'ı iki elle baş arkasından yukarı doğru presle."},
+        "Bench Dips": {"reps": "10-12 Tekrar", "tips": "Elleri sehpa kenarına koy, dirsekleri geriye bükerek gövdeyi indir ve it."}
     },
     "🧘 Karın & Core": {
         "Plank": {"reps": "30-45 Saniye", "tips": "Vücut başından topuğa tek düz bir çizgi halinde olmalı, karnı sıkı tut."},
@@ -93,7 +99,7 @@ app_mode = st.sidebar.radio("Mod Seçiniz:", ["⏱️ Antrenman & Sayaç", "🥗
 # ==============================================================================
 if app_mode == "🥗 Günlük Beslenme & Kalori":
     st.title("🥗 Günlük Kalori & Makro Takibi")
-    st.caption("2 Öğün + Ara Öğün Düzeninize Göre Günlük Kalori ve Makro Dengesi")
+    st.caption("2 Öğün + Ara Öğün Düzenine Göre Canlı Kalori Dengesi")
 
     DAILY_CALORIE_TARGET = 2300
     DAILY_PROTEIN_TARGET = 160
@@ -126,12 +132,11 @@ if app_mode == "🥗 Günlük Beslenme & Kalori":
     st.divider()
 
     st.markdown("### 2. Öğün: Akşam Yemeği Seçimi")
-    st.caption("Bugün evde mi yedin yoksa AVM'de mi? Aşağıdan tükettiğin menüyü seç:")
+    st.caption("Bugün evde mi yedin yoksa AVM'de mi? Menünü seç:")
     
     dinner_choice = st.selectbox("Akşam Yemeği Menüsü:", list(DINNER_OPTIONS.keys()), index=7)
     dinner_data = DINNER_OPTIONS[dinner_choice]
 
-    # Kalori Toplamı Hesaplama
     total_cal = 520
     total_protein = 33
     total_carb = 36
@@ -157,16 +162,15 @@ if app_mode == "🥗 Günlük Beslenme & Kalori":
     c3.metric("Karbonhidrat", f"{total_carb} g")
     c4.metric("Sağlıklı Yağ", f"{total_fat} g")
 
-    # İlerleme Çubuğu
     cal_progress = min(total_cal / DAILY_CALORIE_TARGET, 1.0)
     st.progress(cal_progress)
 
     if total_cal > DAILY_CALORIE_TARGET:
-        st.error(f"⚠️ Hedef kaloriyi {total_cal - DAILY_CALORIE_TARGET} kcal aştın! Özellikle fast food menülerindeki kızartma ve soslar kalori açığını kapatabilir.")
+        st.error(f"⚠️ Hedef kaloriyi {total_cal - DAILY_CALORIE_TARGET} kcal aştın!")
     elif total_cal >= DAILY_CALORIE_TARGET - 250:
-        st.success("🎯 Mükemmel! Hedef kalori ve yağ yakım aralığındasın.")
+        st.success("🎯 Harika! Hedef kalori ve yağ yakım aralığındasın.")
     else:
-        st.info("💡 Kalori açığın oldukça iyi seviyede. Açlık hissedersen 1 kase yoğurt veya 1 bardak kefir ekleyebilirsin.")
+        st.info("💡 Kalori açığın oldukça iyi seviyede.")
 
 # ==============================================================================
 # MODÜL 2: ANTRENMAN VE SAYAÇ
@@ -174,7 +178,7 @@ if app_mode == "🥗 Günlük Beslenme & Kalori":
 elif app_mode == "⏱️ Antrenman & Sayaç":
     if st.session_state.view == "setup":
         st.title("🏋️ Antrenman Planlama")
-        st.caption("Kas gruplarından hareketlerini belirle ve sayacı başlat.")
+        st.caption("Bölgelerden o günkü hareketlerini seç ve antrenmanı başlat.")
 
         with st.form("workout_setup_form"):
             temp_selections = {}
@@ -189,6 +193,7 @@ elif app_mode == "⏱️ Antrenman & Sayaç":
                 )
 
             st.divider()
+            st.markdown("### Set ve Dinlenme Ayarları")
             col1, col2, col3 = st.columns(3)
             with col1:
                 t_sets = st.number_input("Set Sayısı:", min_value=1, max_value=8, value=3)
@@ -290,24 +295,24 @@ elif app_mode == "⏱️ Antrenman & Sayaç":
                     if st.button("Yeniden Planla"):
                         st.session_state.view = "setup"
                         st.rerun()
-            st.rerun()
+        st.rerun()
 
-        st.divider()
-        b_prev, b_home, b_next = st.columns(3)
-        with b_prev:
-            if st.button("⬅️ Önceki Hareket", disabled=(st.session_state.current_index == 0)):
-                st.session_state.current_index -= 1
-                st.session_state.current_set = 1
-                st.session_state.rest_mode = None
-                st.rerun()
-        with b_home:
-            if st.button("⚙️ Ayarlara Dön"):
-                st.session_state.view = "setup"
-                st.session_state.rest_mode = None
-                st.rerun()
-        with b_next:
-            if st.button("➡️ Sonraki Hareket", disabled=(st.session_state.current_index == len(queue) - 1)):
-                st.session_state.current_index += 1
-                st.session_state.current_set = 1
-                st.session_state.rest_mode = None
-                st.rerun()
+    st.divider()
+    b_prev, b_home, b_next = st.columns(3)
+    with b_prev:
+        if st.button("⬅️ Önceki Hareket", disabled=(st.session_state.current_index == 0)):
+            st.session_state.current_index -= 1
+            st.session_state.current_set = 1
+            st.session_state.rest_mode = None
+            st.rerun()
+    with b_home:
+        if st.button("⚙️ Ayarlara Dön"):
+            st.session_state.view = "setup"
+            st.session_state.rest_mode = None
+            st.rerun()
+    with b_next:
+        if st.button("➡️ Sonraki Hareket", disabled=(st.session_state.current_index == len(queue) - 1)):
+            st.session_state.current_index += 1
+            st.session_state.current_set = 1
+            st.session_state.rest_mode = None
+            st.rerun()
